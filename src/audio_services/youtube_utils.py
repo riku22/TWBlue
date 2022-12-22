@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import youtube_dl
+import yt_dlp
 
 def get_video_url(url):
-    ydl = youtube_dl.YoutubeDL({'quiet': True, 'format': 'bestaudio/best', 'outtmpl': u'%(id)s%(ext)s'})
+    ydl = yt_dlp.YoutubeDL({'quiet': True, 'format': 'bestaudio/best', 'outtmpl': u'%(id)s%(ext)s'})
     with ydl:
         result = ydl.extract_info(url, download=False)
     if 'entries' in result:

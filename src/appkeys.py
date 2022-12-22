@@ -1,0 +1,2 @@
+twitter_api_key='daMHlXsFlalEWtaqTL7xd6TqZ'
+twitter_api_secret='lOcpsIlhr1lBpA53oNWwmKh9yM6Gqk3IRFOzq9TvAO8B5gisFD'

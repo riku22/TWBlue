@@ -1,4 +1,4 @@
-wxpython
+https://github.com/josephsl/wxpy32whl/releases/download/4.2.0/wxPython-4.2.0-cp310-cp310-win32.whl
 pytest
 coverage
 wheel
@@ -22,19 +22,16 @@ googletrans==4.0.0-rc1
 idna<3,>=2.5
 chardet
 urllib3
-youtube-dl
 python-vlc
 pypiwin32
 pywin32
 certifi
 backports.functools_lru_cache
-cx_freeze
 tweepy
 twitter-text-parser
 mastodon.py
 pyenchant
 sqlitedict
-cx-Logging
 h11
 h2
 hpack
@@ -51,6 +48,8 @@ pillow
 charset-normalizer
 demoji
 psutil
+yt-dlp
+pyinstaller
 git+https://github.com/accessibleapps/libloader
 git+https://github.com/accessibleapps/platform_utils
 git+https://github.com/accessibleapps/accessible_output2
