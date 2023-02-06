@@ -51,7 +51,7 @@ psutil
 yt-dlp
 pyinstaller
 sphinx
-sphinx-rtd-theme
+sphinx-rtd-theme>1.0
 git+https://github.com/accessibleapps/libloader
 git+https://github.com/accessibleapps/platform_utils
 git+https://github.com/accessibleapps/accessible_output2
