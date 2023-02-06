@@ -322,6 +322,9 @@ class BaseBuffer(base.Buffer):
         else:
             title = _("Reply to {}").format(item.account.username)
             caption = _("Write your reply here")
+            # Set unlisted by default, so we will not clutter other user's buffers with replies.
+            # see https://github.com/MCV-Software/TWBlue/issues/504
+            visibility = "unlisted"
         if item.reblog != None:
             users = ["@{} ".format(user.acct) for user in item.reblog.mentions if user.id != self.session.db["user_id"]]
             if item.reblog.account.acct != item.account.acct and "@{} ".format(item.reblog.account.acct) not in users:

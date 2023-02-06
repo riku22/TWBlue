@@ -2,6 +2,21 @@ TWBlue Changelog
 
 ## changes in this version
 
+This release focuses on fixing some important bugs that have been reported in the previous version. Particularly, TWBlue should be able to authorize on some instances that have blocked the Mastodon.py library, and should be able to avoid repeatedly calling some endpoints that cause excessive connections for some instances. Additionally, it is possible to disable Streaming from the account options in Mastodon. This can be especially useful if TWBlue keeps making a lot of API calls for some instances.
+
+* Fixed the update system.
+* Fixed a bug when attempting to switch between different accounts using the invisible interface, if the focused account is not an active session.
+* Mastodon:
+    * Improved the way TWBlue counts characters in Mastodon. Now it counts only the username part in a remote user (@domain is not counted against character limit), adds content warning text to character count, also emojis and CJK characters are counted as 1 as opposed to 2. ([#511](https://github.com/MCV-Software/TWBlue/issues/511))
+    * Added notification when a user joins an instance. This notification is only available for administrators.
+    * Added option to disable Streaming in the account options. This can be useful if TWBlue, for some reason, repeatedly calls the instance API.
+    * Improved the code that works with the Streaming API to reduce the number of reconnection attempts TWBlue performs.
+    * Fixed media uploads for audio, video and gifvs. ([#513](https://github.com/MCV-Software/TWBlue/issues/513))
+
+## Changes in version 2023.2.3
+
+In this version, TWBlue will no longer support Twitter sessions starting on February 9, due to Twitter's policies prohibiting third-party clients, in addition to the shutdown of the free access to the Twitter API. All Twitter sessions that are active on TWBlue will stop working as of February 9, when the free API access will finally be shut down. It will not be possible to display or add Twitter sessions from the Session manager. From the TWBlue team, we will continue working to improve our support for Mastodon instances and add other social networks in the near future. If you want to keep in touch with the project, you can follow us in our mastodon account, at [@twblue@maaw.social.](https://maaw.social/@twblue)
+
 * In the graphical interface, TWBlue will update menu items, in the menu bar, depending on whether you are focusing a Twitter or Mastodon session. This makes it possible for TWBlue to display the correct terms in each social network. Take into account that there might be unavailable items for the currently active session.
 * in the keystroke editor for the invisible interface, TWBlue displays the available shortcuts for the currently active session. Descriptions of those keystrokes are also different for Twitter and mastodon sessions to use correct terms for both networks.
 * In the invisible interface, TWBlue will skip sessions that have not been started when using the keyboard shortcut to switch between different accounts.
@@ -9,9 +24,14 @@ TWBlue Changelog
 * Mastodon:
     * Added basic support to notifications buffer. This buffer shows mastodon notifications in real time. Every notification is attached to a kind of object (posts, users, relationships or polls). At the moment, the only supported action for notification is dismissing, which allows you to remove the notification from the buffer (take into account, though, that mention notifications will remove also the mention in its corresponding buffer, due to the way TWBlue reads mentions from mastodon instances).
     * Fixed an issue that was preventing TWBlue to create more than one user timeline during startup.
+    * Fixed getting more items in mentions buffer. ([#508](https://github.com/mcv-software/twblue/issues/508))
     * TWBlue will display properly new paragraphs in mastodon posts.
     * In the session manager, Mastodon sessions are now displayed including the instance to avoid confusion.
     * TWBlue will now read default visibility preferences when posting new statuses, and display sensitive content. These preferences can be set on the mastodon instance, in the account's preferences section. If you wish to change TWBlue's behavior and have it not read those preferences from your instance, but instead set the default public visibility and hide sensitive content, you can uncheck the Read preferences from instance checkbox in the account options.
+    * If a mastodon instance is not active or there are errors during login, TWBlue will report it in the log file and will continue with other sessions.
+    * When replying to someone in a public post, TWBlue will default to "unlisted" as its visibility setting. This is done so replies will not clutter local and federated timelines. This setting might be changed when writing the reply, though. ([#504,](https://github.com/MCV-Software/TWBlue/issues/504))
+    * TWBlue uses its own user agent in Mastodon sessions, so it will be easier to identify the client for instance admins.
+    * TWBlue will check if the streaming API endpoints are available before attempting to start Streaming for the current session. Before, TWBlue caused load issues in misconfigured mastodon instances where the streaming API were not available.
 
 ## Changes in version 2022.12.13
 

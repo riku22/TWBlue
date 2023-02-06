@@ -63,7 +63,9 @@ def compose_notification(notification, db, relative_times, show_screen_names, sa
     else:
         ts = original_date.shift(hours=db["utc_offset"]).format(_("dddd, MMMM D, YYYY H:m"), locale=languageHandler.curLang[:2])
     text = "Unknown: %r" % (notification)
-    if notification.type == "mention":
+    if notification.type == "status":
+        text = _("{username} has posted: {status}").format(username=user, status=",".join(compose_post(notification.status, db, relative_times, show_screen_names, safe=safe)))
+    elif notification.type == "mention":
         text = _("{username} has mentionned you: {status}").format(username=user, status=",".join(compose_post(notification.status, db, relative_times, show_screen_names, safe=safe)))
     elif notification.type == "reblog":
         text = _("{username} has boosted: {status}").format(username=user, status=",".join(compose_post(notification.status, db, relative_times, show_screen_names, safe=safe)))
@@ -71,6 +73,8 @@ def compose_notification(notification, db, relative_times, show_screen_names, sa
         text = _("{username} has added to favorites: {status}").format(username=user, status=",".join(compose_post(notification.status, db, relative_times, show_screen_names, safe=safe)))
     elif notification.type == "follow":
         text = _("{username} has followed you.").format(username=user)
+    elif notification.type == "admin.sign_up":
+        text = _("{username} has joined the instance.").format(username=user)
     elif notification.type == "poll":
         text = _("A poll in which you have voted has expired: {status}").format(status=",".join(compose_post(notification.status, db, relative_times, show_screen_names, safe=safe)))
     elif notification.type == "follow_request":

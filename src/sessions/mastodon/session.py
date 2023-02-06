@@ -39,7 +39,7 @@ class Session(base.baseSession):
         if self.settings["mastodon"]["access_token"] != None and self.settings["mastodon"]["instance"] != None:
             try:
                 log.debug("Logging in to Mastodon instance {}...".format(self.settings["mastodon"]["instance"]))
-                self.api = mastodon.Mastodon(access_token=self.settings["mastodon"]["access_token"], api_base_url=self.settings["mastodon"]["instance"], mastodon_version=MASTODON_VERSION)
+                self.api = mastodon.Mastodon(access_token=self.settings["mastodon"]["access_token"], api_base_url=self.settings["mastodon"]["instance"], mastodon_version=MASTODON_VERSION, user_agent="TWBlue/{}".format(application.version))
                 if verify_credentials == True:
                     credentials = self.api.account_verify_credentials()
                     self.db["user_name"] = credentials["username"]
@@ -48,8 +48,8 @@ class Session(base.baseSession):
                 self.logged = True
                 log.debug("Logged.")
                 self.counter = 0
-            except IOError:
-                log.error("The login attempt failed.")
+            except MastodonError:
+                log.exception("The login attempt failed.")
                 self.logged = False
         else:
             self.logged = False
@@ -66,7 +66,7 @@ class Session(base.baseSession):
             return
         try:
             client_id, client_secret = mastodon.Mastodon.create_app("TWBlue", api_base_url=authorisation_dialog.GetValue(), website="https://twblue.es")
-            temporary_api = mastodon.Mastodon(client_id=client_id, client_secret=client_secret, api_base_url=instance, mastodon_version=MASTODON_VERSION)
+            temporary_api = mastodon.Mastodon(client_id=client_id, client_secret=client_secret, api_base_url=instance, mastodon_version=MASTODON_VERSION, user_agent="TWBlue/{}".format(application.version))
             auth_url = temporary_api.auth_request_url()
         except MastodonError:
             dlg = wx.MessageDialog(None, _("We could not connect to your mastodon instance. Please verify that the domain exists and the instance is accessible via a web browser."), _("Instance error"), wx.ICON_ERROR)
@@ -210,7 +210,7 @@ class Session(base.baseSession):
                     poll = self.api.make_poll(options=obj["attachments"][0]["options"], expires_in=obj["attachments"][0]["expires_in"], multiple=obj["attachments"][0]["multiple"], hide_totals=obj["attachments"][0]["hide_totals"])
                 else:
                     for i in obj["attachments"]:
-                        img = self.api_call("media_post", media_file=i["file"], description=i["description"])
+                        img = self.api_call("media_post", media_file=i["file"], description=i["description"], synchronous=True)
                         media_ids.append(img.id)
                 item = self.api_call(call_name="status_post", status=text, _sound="tweet_send.ogg", in_reply_to_id=in_reply_to_id, media_ids=media_ids, visibility=visibility, poll=poll, sensitive=obj["sensitive"], spoiler_text=obj["spoiler_text"])
                 if item != None:
@@ -223,29 +223,25 @@ class Session(base.baseSession):
         return "Mastodon: {}@{}".format(user, instance)
 
     def start_streaming(self):
-        if config.app["app-settings"]["no_streaming"]:
+        if self.settings["general"]["disable_streaming"]:
+            log.info("Streaming is disabled for session {}. Skipping...".format(self.get_name()))
             return
         listener = streaming.StreamListener(session_name=self.get_name(), user_id=self.db["user_id"])
-        self.user_stream = self.api.stream_user(listener, run_async=True)
-        self.direct_stream = self.api.stream_direct(listener, run_async=True)
+        try:
+            stream_healthy = self.api.stream_healthy()
+            if stream_healthy == True:
+                self.user_stream = self.api.stream_user(listener, run_async=True, reconnect_async=True, reconnect_async_wait_sec=30)
+                self.direct_stream = self.api.stream_direct(listener, run_async=True, reconnect_async=True, reconnect_async_wait_sec=30)
+                log.debug("Started streams for session {}.".format(self.get_name()))
+        except Exception as e:
+            log.exception("Detected streaming unhealthy in {} session.".format(self.get_name()))
 
     def stop_streaming(self):
         if config.app["app-settings"]["no_streaming"]:
             return
-#        if hasattr(self, "user_stream"):
-#            self.user_stream.close()
-#            log.debug("Stream stopped for accounr {}".format(self.db["user_name"]))
-#        if hasattr(self, "direct_stream"):
-#            self.direct_stream.close()
-#            log.debug("Stream stopped for accounr {}".format(self.db["user_name"]))
 
     def check_streams(self):
-        if config.app["app-settings"]["no_streaming"]:
-            return
-        if not hasattr(self, "user_stream"):
-            return
-        if self.user_stream.is_alive() == False or self.user_stream.is_receiving() == False or self.direct_stream.is_alive() == False or self.direct_stream.is_receiving() == False:
-            self.start_streaming()
+        pass
 
     def check_buffers(self, status):
         buffers = []
@@ -284,7 +280,7 @@ class Session(base.baseSession):
         obj = None
         if notification.type == "mention":
             buffers = ["mentions"]
-            obj = notification.status
+            obj = notification
         elif notification.type == "follow":
             buffers = ["followers"]
             obj = notification.account
