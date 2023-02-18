@@ -147,14 +147,16 @@ class Post(wx.Dialog):
     def get_video(self):
         openFileDialog = wx.FileDialog(self, _("Select the video to be uploaded"), "", "", _("Video files (*.mp4, *.mov, *.m4v, *.webm)| *.mp4; *.m4v; *.mov; *.webm"), wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if openFileDialog.ShowModal() == wx.ID_CANCEL:
-            return None
-        return openFileDialog.GetPath()
+            return (None, None)
+        dsc = self.ask_description()
+        return (openFileDialog.GetPath(), dsc)
 
     def get_audio(self):
         openFileDialog = wx.FileDialog(self, _("Select the audio file to be uploaded"), "", "", _("Audio files (*.mp3, *.ogg, *.wav, *.flac, *.opus, *.aac, *.m4a, *.3gp)|*.mp3; *.ogg; *.wav; *.flac; *.opus; *.aac; *.m4a; *.3gp"), wx.FD_OPEN | wx.FD_FILE_MUST_EXIST)
         if openFileDialog.ShowModal() == wx.ID_CANCEL:
-            return None
-        return openFileDialog.GetPath()
+            return (None, None)
+        dsc = self.ask_description()
+        return (openFileDialog.GetPath(), dsc)
 
     def unable_to_attach_file(self, *args, **kwargs):
         return wx.MessageDialog(self, _("It is not possible to add more attachments. Please take into account that You can add only a maximum of 4 images, or one audio, video or poll  per post. Please remove other attachments before continuing."), _("Error adding attachment"), wx.ICON_ERROR).ShowModal()
@@ -295,7 +297,7 @@ class poll(wx.Dialog):
         self.option4 = wx.TextCtrl(self, wx.ID_ANY, "")
         self.option4.SetMaxLength(25)
         option4_sizer.Add(self.option4, 0, 0, 0)
-        self.multiple = wx.CheckBox(self, wx.ID_ANY, _("Allow multiple votes per user"))
+        self.multiple = wx.CheckBox(self, wx.ID_ANY, _("Allow multiple choices per user"))
         self.multiple.SetValue(False)
         sizer_1.Add(self.multiple, 0, wx.ALL, 5)
         self.hide_votes = wx.CheckBox(self, wx.ID_ANY, _("Hide votes count until the poll expires"))
@@ -326,3 +328,41 @@ class poll(wx.Dialog):
         if len(options) < 2:
             return wx.MessageDialog(self, _("Please make sure you have provided at least two options for the poll."), _("Not enough information"), wx.ICON_ERROR).ShowModal()
         self.EndModal(wx.ID_OK)
+
+class attachedPoll(wx.Dialog):
+    def __init__(self, poll_options, multiple=False, *args, **kwds):
+        super(attachedPoll, self).__init__(parent=None, id=wx.NewId(), title=_("Vote in this poll"))
+        self.poll_options = poll_options
+        sizer_1 = wx.BoxSizer(wx.VERTICAL)
+        sizer_2 = wx.StaticBoxSizer(wx.StaticBox(self, wx.ID_ANY, _("Options")), wx.VERTICAL)
+        sizer_1.Add(sizer_2, 1, wx.EXPAND, 0)
+        if multiple == False:
+            for option in range(len(self.poll_options)):
+                if option == 0:
+                    setattr(self, "option{}".format(option), wx.RadioButton(self, wx.ID_ANY, poll_options[option],  style=wx.RB_GROUP))
+                else:
+                    setattr(self, "option{}".format(option), wx.RadioButton(self, wx.ID_ANY, poll_options[option]))
+        else:
+            for option in range(len(self.poll_options)):
+                setattr(self, "option{}".format(option), wx.CheckBox(self, wx.ID_ANY, poll_options[option]))
+            sizer_2.Add(getattr(self, "option{}".format(option)), 1, wx.EXPAND, 0)
+        btn_sizer = wx.StdDialogButtonSizer()
+        sizer_1.Add(btn_sizer, 0, wx.ALIGN_RIGHT | wx.ALL, 4)
+        self.button_OK = wx.Button(self, wx.ID_OK)
+        self.button_OK.SetDefault()
+        btn_sizer.AddButton(self.button_OK)
+        self.button_CANCEL = wx.Button(self, wx.ID_CANCEL, "")
+        btn_sizer.AddButton(self.button_CANCEL)
+        btn_sizer.Realize()
+        self.SetSizer(sizer_1)
+        sizer_1.Fit(self)
+        self.SetAffirmativeId(self.button_OK.GetId())
+        self.SetEscapeId(self.button_CANCEL.GetId())
+        self.Layout()
+
+    def get_selected(self):
+        options = []
+        for option in range(len(self.poll_options)):
+            if getattr(self, "option{}".format(option)).GetValue() == True:
+                options.append(option)
+        return options

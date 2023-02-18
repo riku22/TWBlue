@@ -593,6 +593,11 @@ class Controller(object):
         if hasattr(buffer, "toggle_favorite"):
             return buffer.toggle_favorite()
 
+    def vote(self, *args, **kwargs):
+        buffer = self.get_current_buffer()
+        if hasattr(buffer, "vote"):
+            return buffer.vote()
+
     def view_item(self, *args, **kwargs):
         buffer = self.get_current_buffer()
         if hasattr(buffer, "view_item"):
@@ -829,7 +834,10 @@ class Controller(object):
         output.speak(msg, True)
 
     def previous_account(self, *args, **kwargs):
-        index = self.accounts.index(self.current_account)
+        try:
+            index = self.accounts.index(self.current_account)
+        except ValueError:
+            index = 0
         if index-1 < 0:
             index = len(self.accounts)-1
         else:
