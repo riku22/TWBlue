@@ -47,7 +47,7 @@ def wx_files():
 a = Analysis(['main.py'],
              pathex=['.'],
              binaries=[("sounds", "sounds"),
-#("documentation", "documentation"),
+("documentation", "documentation"),
 ("locales", "locales"),
 ("keymaps", "keymaps"),
 ("keys/lib", "keys/lib"),
