@@ -60,7 +60,7 @@ a = Analysis(['main.py'],
              datas=[]
 +collect_data_files('twitter_text')
 +collect_data_files('demoji'),
-             hiddenimports=["twitter_text", "yt-dlp", "mastodon.py"],
+             hiddenimports=["twitter_text", "yt_dlp", "mastodon"],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
