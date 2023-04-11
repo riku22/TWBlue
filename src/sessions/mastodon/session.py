@@ -11,7 +11,7 @@ import config
 import config_utils
 import output
 import application
-from mastodon import MastodonError, MastodonNotFoundError, MastodonUnauthorizedError
+from mastodon import MastodonError, MastodonAPIError, MastodonNotFoundError, MastodonUnauthorizedError
 from pubsub import pub
 from mysc.thread_utils import call_threaded
 from sessions import base
@@ -123,25 +123,6 @@ class Session(base.baseSession):
         ### ToDo: Use a function to retrieve all muted users.
         self.db["muted_users"] = self.api.mutes()
 
-    def get_user_alias(self, user):
-        if user.display_name == None or user.display_name == "":
-            display_name = user.username
-        else:
-            display_name = user.display_name
-        aliases = self.settings.get("user-aliases")
-        if aliases == None:
-            log.error("Aliases are not defined for this config spec.")
-            return self.demoji_user(display_name)
-        user_alias = aliases.get(user.id)
-        if user_alias != None:
-            return user_alias
-        return self.demoji_user(display_name)
-
-    def demoji_user(self, name):
-        if self.settings["general"]["hide_emojis"] == True:
-            return demoji.replace(name, "")
-        return name
-
     def order_buffer(self, name, data, ignore_older=False):
         num = 0
         last_id = None
@@ -189,13 +170,13 @@ class Session(base.baseSession):
                 finished = True
             except Exception as e:
                 output.speak(str(e))
-                val = None
-                if type(e) != MastodonNotFoundError  and type(e) != MastodonUnauthorizedError :
-                    tries = tries+1
-                    time.sleep(5)
-                if tries == 4 and finished == False:
+                if isinstance(e, MastodonAPIError):
+                    log.exception("API Error returned when making a Call on {}. Call name={}, args={}, kwargs={}".format(self.get_name(), call_name, args, kwargs))
                     raise e
-                else:
+                val = None
+                tries = tries+1
+                time.sleep(5)
+                if tries == 4 and finished == False:
                     raise e
         if report_success:
             output.speak(_("%s succeeded.") % action)

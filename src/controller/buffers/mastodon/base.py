@@ -17,10 +17,11 @@ from sessions.mastodon import compose, utils, templates
 from mysc.thread_utils import call_threaded
 from pubsub import pub
 from extra import ocr
-from wxUI import buffers, dialogs, commonMessageDialogs
+from wxUI import buffers, commonMessageDialogs
 from wxUI.dialogs.mastodon import menus
 from wxUI.dialogs.mastodon import dialogs as mastodon_dialogs
 from wxUI.dialogs.mastodon.postDialogs import attachedPoll
+from wxUI.dialogs import urlList
 
 log = logging.getLogger("controller.buffers.mastodon.base")
 
@@ -77,7 +78,7 @@ class BaseBuffer(base.Buffer):
         safe = True
         if self.session.settings["general"]["read_preferences_from_instance"]:
             safe = self.session.expand_spoilers == False
-        return self.compose_function(self.get_item(), self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)[1]
+        return self.compose_function(self.get_item(), self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)[1]
 
     def get_message(self):
         post = self.get_item()
@@ -90,7 +91,7 @@ class BaseBuffer(base.Buffer):
                 template = template.replace("$safe_text", "$text")
             elif self.session.expand_spoilers == False and "$text" in template:
                 template = template.replace("$text", "$safe_text")
-        t = templates.render_post(post, template, relative_times=self.session.settings["general"]["relative_times"], offset_hours=self.session.db["utc_offset"])
+        t = templates.render_post(post, template, self.session.settings, relative_times=self.session.settings["general"]["relative_times"], offset_hours=self.session.db["utc_offset"])
         return t
 
     def start_stream(self, mandatory=False, play_sound=True, avoid_autoreading=False):
@@ -118,6 +119,7 @@ class BaseBuffer(base.Buffer):
             if hasattr(self, "finished_timeline") and self.finished_timeline == False:
                 if "-timeline" in self.name:
                     self.username = self.session.db[self.name][0]["account"].username
+                    pub.sendMessage("core.change_buffer_title", name=self.session.get_name(), buffer=self.name, title=_("Timeline for {}").format(self.username))
                 self.finished_timeline = True
             self.put_items_on_list(number_of_items)
             if number_of_items > 0 and  self.name != "sent_posts" and self.name != "sent_direct_messages" and self.sound != None and self.session.settings["sound"]["session_mute"] == False and self.name not in self.session.settings["other_buffers"]["muted_buffers"] and play_sound == True:
@@ -137,7 +139,7 @@ class BaseBuffer(base.Buffer):
             safe = True
             if self.session.settings["general"]["read_preferences_from_instance"]:
                 safe = self.session.expand_spoilers == False
-            output.speak(" ".join(self.compose_function(post, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)))
+            output.speak(" ".join(self.compose_function(post, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)))
         elif number_of_items > 1 and self.name in self.session.settings["other_buffers"]["autoread_buffers"] and self.name not in self.session.settings["other_buffers"]["muted_buffers"] and self.session.settings["sound"]["session_mute"] == False:
             output.speak(_("{0} new posts in {1}.").format(number_of_items, self.get_buffer_name()))
 
@@ -168,11 +170,11 @@ class BaseBuffer(base.Buffer):
             safe = self.session.expand_spoilers == False
         if self.session.settings["general"]["reverse_timelines"] == False:
             for i in elements:
-                post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+                post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
                 self.buffer.list.insert_item(True, *post)
         else:
             for i in elements:
-                post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+                post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
                 self.buffer.list.insert_item(False, *post)
             self.buffer.list.select_item(selection)
         output.speak(_(u"%s items retrieved") % (str(len(elements))), True)
@@ -206,20 +208,20 @@ class BaseBuffer(base.Buffer):
             safe = self.session.expand_spoilers == False
         if self.buffer.list.get_count() == 0:
             for i in list_to_use:
-                post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+                post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
                 self.buffer.list.insert_item(False, *post)
             self.buffer.set_position(self.session.settings["general"]["reverse_timelines"])
         elif self.buffer.list.get_count() > 0 and number_of_items > 0:
             if self.session.settings["general"]["reverse_timelines"] == False:
                 items = list_to_use[len(list_to_use)-number_of_items:]
                 for i in items:
-                    post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+                    post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
                     self.buffer.list.insert_item(False, *post)
             else:
                 items = list_to_use[0:number_of_items]
                 items.reverse()
                 for i in items:
-                    post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+                    post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
                     self.buffer.list.insert_item(True, *post)
         log.debug("Now the list contains %d items " % (self.buffer.list.get_count(),))
 
@@ -227,7 +229,7 @@ class BaseBuffer(base.Buffer):
         safe = True
         if self.session.settings["general"]["read_preferences_from_instance"]:
             safe = self.session.expand_spoilers == False
-        post = self.compose_function(item, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+        post = self.compose_function(item, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
         if self.session.settings["general"]["reverse_timelines"] == False:
             self.buffer.list.insert_item(False, *post)
         else:
@@ -239,7 +241,7 @@ class BaseBuffer(base.Buffer):
         safe = True
         if self.session.settings["general"]["read_preferences_from_instance"]:
             safe = self.session.expand_spoilers == False
-        post = self.compose_function(item, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
+        post = self.compose_function(item, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"], safe=safe)
         self.buffer.list.list.SetItem(position, 1, post[1])
 
     def bind_events(self):
@@ -415,7 +417,7 @@ class BaseBuffer(base.Buffer):
         if len(urls) == 1:
             url=urls[0]
         elif len(urls) > 1:
-            urls_list = dialogs.urlList.urlList()
+            urls_list = urlList.urlList()
             urls_list.populate_list(urls)
             if urls_list.get_response() == widgetUtils.OK:
                 url=urls_list.get_string()
@@ -436,7 +438,7 @@ class BaseBuffer(base.Buffer):
             if len(urls) == 1:
                 url=urls[0]
             elif len(urls) > 1:
-                urls_list = dialogs.urlList.urlList()
+                urls_list = urlList.urlList()
                 urls_list.populate_list(urls)
                 if urls_list.get_response() == widgetUtils.OK:
                     url=urls_list.get_string()
@@ -539,7 +541,41 @@ class BaseBuffer(base.Buffer):
     def ocr_image(self):
         post = self.get_item()
         media_list = []
-        pass
+        if post.reblog != None:
+            post = post.reblog
+        for media in post.get("media_attachments"):
+            if media.get("type", "") == "image":
+                media_list.append(media)
+        if len(media_list) > 1:
+            image_list = [_(u"Picture {0}").format(i+1,) for i in range(0, len(media_list))]
+            dialog = urlList.urlList(title=_(u"Select the picture"))
+            dialog.populate_list(image_list)
+            if dialog.get_response() == widgetUtils.OK:
+                img = media_list[dialog.get_item()]
+            else:
+                return
+        elif len(media_list) == 1:
+            img = media_list[0]
+        else:
+            return
+        if self.session.settings["mysc"]["ocr_language"] != "":
+            ocr_lang = self.session.settings["mysc"]["ocr_language"]
+        else:
+            ocr_lang = ocr.OCRSpace.short_langs.index(post.language)
+            ocr_lang = ocr.OCRSpace.OcrLangs[ocr_lang]
+        if img["remote_url"] != None:
+            url = img["remote_url"]
+        else:
+            url = img["url"]
+        api = ocr.OCRSpace.OCRSpaceAPI()
+        try:
+            text = api.OCR_URL(url)
+        except ocr.OCRSpace.APIError as er:
+            output.speak(_(u"Unable to extract text"))
+            return
+        viewer = messages.text(title=_("OCR Result"), text=text["ParsedText"])
+        response = viewer.message.ShowModal()
+        viewer.message.Destroy()
 
     def vote(self):
         post = self.get_item()
@@ -566,7 +602,7 @@ class BaseBuffer(base.Buffer):
             return
         poll = self.session.api_call(call_name="poll_vote", id=poll.id, choices=options, preexec_message=_("Sending vote..."))
 
-    def post_from_error(self, visibility, data):
+    def post_from_error(self, visibility, reply_to, data):
         title = _("Post")
         caption = _("Write your post here")
         post = messages.post(session=self.session, title=title, caption=caption)
@@ -574,6 +610,6 @@ class BaseBuffer(base.Buffer):
         response = post.message.ShowModal()
         if response == wx.ID_OK:
             post_data = post.get_data()
-            call_threaded(self.session.send_post, posts=post_data, visibility=post.get_visibility())
+            call_threaded(self.session.send_post, posts=post_data, reply_to=reply_to, visibility=post.get_visibility())
         if hasattr(post.message, "destroy"):
             post.message.destroy()

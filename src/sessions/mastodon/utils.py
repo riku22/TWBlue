@@ -1,4 +1,5 @@
 import re
+import demoji
 from html.parser import HTMLParser
 
 url_re = re.compile('<a\s*href=[\'|"](.*?)[\'"].*?>')
@@ -54,7 +55,11 @@ def get_media_urls(post):
     urls = []
     for media in post.media_attachments:
         if media.get("type") == "audio" or media.get("type") == "video":
-            urls.append(media.get("url"))
+            url_keys = ["remote_url", "url"]
+            for url_key in url_keys:
+                if media.get(url_key) != None:
+                    urls.append(media.get(url_key))
+                    break
     return urls
 
 def find_urls(post, include_tags=False):
@@ -65,3 +70,24 @@ def find_urls(post, include_tags=False):
                 if url.lower().endswith("/tags/"+tag["name"]):
                     urls.remove(url)
     return urls
+
+def get_user_alias(user, settings):
+    if user.display_name == None or user.display_name == "":
+        display_name = user.username
+    else:
+        display_name = user.display_name
+    aliases = settings.get("user-aliases")
+    if aliases == None:
+        return demoji_user(display_name, settings)
+    user_alias = aliases.get(str(user.id))
+    if user_alias != None:
+        return user_alias
+    return demoji_user(display_name, settings)
+
+def demoji_user(name, settings):
+    if settings["general"]["hide_emojis"] == True:
+        user = demoji.replace(name, "")
+        # Take care of Mastodon instance emojis.
+        user = re.sub(r":(.*?):", "", user)
+        return user
+    return name

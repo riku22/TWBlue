@@ -6,7 +6,7 @@ import widgetUtils
 import config
 import output
 from twitter_text import parse_tweet, config
-from controller.twitter import messages
+from controller import messages
 from sessions.mastodon import templates
 from wxUI.dialogs.mastodon import postDialogs
 
@@ -23,7 +23,7 @@ def character_count(post_text, post_cw, character_limit=500):
     parsed = parse_tweet(full_text, options=options)
     return parsed.weightedLength
 
-class post(messages.basicTweet):
+class post(messages.basicMessage):
     def __init__(self, session, title, caption, text="", *args, **kwargs):
         # take max character limit from session as this might be different for some instances.
         self.max = session.char_limit
@@ -79,6 +79,8 @@ class post(messages.basicTweet):
         visibility_settings = dict(public=0, unlisted=1, private=2, direct=3)
         self.message.visibility.SetSelection(visibility_settings.get(visibility))
         self.message.on_sensitivity_changed()
+        for attachment in self.attachments:
+            self.message.add_item(item=[attachment["file"], attachment["type"], attachment["description"]])
         self.text_processor()
 
     def text_processor(self, *args, **kwargs):
@@ -268,3 +270,11 @@ class viewPost(post):
         if hasattr(self, "item_url"):
             output.copy(self.item_url)
             output.speak(_("Link copied to clipboard."))
+
+class text(messages.basicMessage):
+    def __init__(self, title, text="", *args, **kwargs):
+        self.title = title
+        self.message = postDialogs.viewText(title=title, text=text, *args, **kwargs)
+        self.message.text.SetInsertionPoint(len(self.message.text.GetValue()))
+        widgetUtils.connect_event(self.message.spellcheck, widgetUtils.BUTTON_PRESSED, self.spellcheck)
+        widgetUtils.connect_event(self.message.translateButton, widgetUtils.BUTTON_PRESSED, self.translate)

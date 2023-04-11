@@ -4,6 +4,7 @@ import logging
 import wx
 import widgetUtils
 import output
+from pubsub import pub
 from mysc.thread_utils import call_threaded
 from controller.buffers.mastodon.base import BaseBuffer
 from controller.mastodon import messages
@@ -22,7 +23,7 @@ class UserBuffer(BaseBuffer):
         if user == None:
             return
         template = self.session.settings["templates"]["person"]
-        t = templates.render_user(user=user, template=template, relative_times=self.session.settings["general"]["relative_times"], offset_hours=self.session.db["utc_offset"])
+        t = templates.render_user(user=user, template=template, settings=self.session.settings, relative_times=self.session.settings["general"]["relative_times"], offset_hours=self.session.db["utc_offset"])
         return t
 
     def bind_events(self):
@@ -88,6 +89,11 @@ class UserBuffer(BaseBuffer):
             if hasattr(self, "finished_timeline") and self.finished_timeline == False:
                 if "-followers" in self.name or "-following" in self.name:
                     self.username = self.session.api.account(id=self.kwargs.get("id")).username
+                    if "-followers" in self.name:
+                        title=_("Followers for {}").format(self.username)
+                    else:
+                        title=_("Following for {}").format(self.username)
+                    pub.sendMessage("core.change_buffer_title", name=self.session.get_name(), buffer=self.name, title=title)
                 self.finished_timeline = True
             self.put_items_on_list(number_of_items)
             if number_of_items > 0 and  self.name != "sent_posts" and self.name != "sent_direct_messages" and self.sound != None and self.session.settings["sound"]["session_mute"] == False and self.name not in self.session.settings["other_buffers"]["muted_buffers"] and play_sound == True:
@@ -123,11 +129,11 @@ class UserBuffer(BaseBuffer):
         log.debug("Retrieved %d items from cursored search in function %s." % (len(elements), self.function))
         if self.session.settings["general"]["reverse_timelines"] == False:
             for i in elements:
-                post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"])
+                post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"])
                 self.buffer.list.insert_item(True, *post)
         else:
             for i in elements:
-                post = self.compose_function(i, self.session.db, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"])
+                post = self.compose_function(i, self.session.db, self.session.settings, self.session.settings["general"]["relative_times"], self.session.settings["general"]["show_screen_names"])
                 self.buffer.list.insert_item(False, *post)
             self.buffer.list.select_item(selection)
         output.speak(_(u"%s items retrieved") % (str(len(elements))), True)

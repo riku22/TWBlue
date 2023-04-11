@@ -10,7 +10,6 @@ oauthlib
 requests-oauthlib
 requests-toolbelt
 pypubsub
-geopy
 arrow
 python-dateutil
 winpaths
@@ -27,7 +26,6 @@ pypiwin32
 pywin32
 certifi
 backports.functools_lru_cache
-tweepy
 twitter-text-parser
 mastodon.py
 pyenchant
