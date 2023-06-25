@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TW Blue 0.94\n"
 "Report-Msgid-Bugs-To: manuel@manuelcortez.net\n"
-"POT-Creation-Date: 2023-06-11 00:55+0000\n"
-"PO-Revision-Date: 2023-04-11 06:45+0000\n"
+"POT-Creation-Date: 2023-06-25 00:56+0000\n"
+"PO-Revision-Date: 2023-06-19 19:45+0000\n"
 "Last-Translator: Corentin Bacqué-Cazenave <corentin@progaccess.net>\n"
 "Language: fr\n"
 "Language-Team: French "
@@ -1559,7 +1559,7 @@ msgstr ""
 
 #: sessions/mastodon/compose.py:15 sessions/mastodon/compose.py:58
 msgid "dddd, MMMM D, YYYY H:m"
-msgstr "dddd, MMMM D, YYYY H:m"
+msgstr "dddd D MMMM YYYY à HH:mm"
 
 #: sessions/mastodon/compose.py:17 sessions/mastodon/templates.py:73
 #: sessions/mastodon/templates.py:74
@@ -1568,7 +1568,7 @@ msgstr "Partage de @{} : {}"
 
 #: sessions/mastodon/compose.py:33 sessions/mastodon/templates.py:28
 msgid "dddd, MMMM D, YYYY H:m:s"
-msgstr "dddd D MMMM YYYY à H:m:s"
+msgstr "dddd D MMMM YYYY à HH:mm:ss"
 
 #: sessions/mastodon/compose.py:35
 #, python-format
