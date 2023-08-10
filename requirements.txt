@@ -1,4 +1,4 @@
-https://github.com/josephsl/wxpy32whl/releases/download/4.2.0/wxPython-4.2.0-cp310-cp310-win32.whl
+wxpython==4.2.1
 pytest
 coverage
 wheel
