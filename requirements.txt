@@ -42,7 +42,7 @@ sniffio
 attrs
 importlib-metadata
 numpy
-pillow
+pillow<10.0
 charset-normalizer
 demoji
 psutil
