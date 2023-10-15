@@ -7,8 +7,6 @@ import platform
 from requests import certs
 from PyInstaller.utils.hooks import collect_data_files
 
-block_cipher = None
-
 def get_architecture_files():
 	""" Returns architecture files for 32 or 64 bits. """
 	if platform.architecture()[0][:2] == "32":
@@ -60,15 +58,13 @@ a = Analysis(['main.py'],
              datas=[]
 +collect_data_files('twitter_text')
 +collect_data_files('demoji'),
-             hiddenimports=["twitter_text", "yt_dlp", "mastodon"],
+#             hiddenimports=["twitter_text", "yt_dlp", "mastodon"],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
-             win_no_prefer_redirects=False,
-             win_private_assemblies=False,
-             cipher=block_cipher)
-pyz = PYZ(a.pure, a.zipped_data,
-             cipher=block_cipher)
+            noarchive=False,
+             )
+pyz = PYZ(a.pure)
 exe = EXE(pyz,
           a.scripts,
 #    [('v', None, 'OPTION')],
@@ -80,7 +76,6 @@ exe = EXE(pyz,
           console=False)
 coll = COLLECT(exe,
                a.binaries,
-               a.zipfiles,
                a.datas,
                strip=False,
                upx=False,
