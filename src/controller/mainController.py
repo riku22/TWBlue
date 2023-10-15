@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import sys
 import logging
 import webbrowser
 import wx
@@ -139,6 +140,7 @@ class Controller(object):
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.delete, self.view.delete)
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.follow, menuitem=self.view.follow)
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.send_dm, self.view.dm)
+        widgetUtils.connect_event(self.view, widgetUtils.MENU, self.user_details, self.view.details)
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.get_more_items, menuitem=self.view.load_previous_items)
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.clear_buffer, menuitem=self.view.clear)
         widgetUtils.connect_event(self.view, widgetUtils.MENU, self.remove_buffer, self.view.deleteTl)
@@ -428,6 +430,10 @@ class Controller(object):
             return handler.account_settings(buffer=buffer, controller=self)
 
     def check_for_updates(self, *args, **kwargs):
+        if not getattr(sys, 'frozen', False):
+            log.debug("Running from source, can't update")
+            commonMessageDialogs.cant_update_source()
+            return
         update = updater.do_update()
         if update == False:
             view.no_update_available()
@@ -985,9 +991,9 @@ class Controller(object):
     def repeat_item(self, *args, **kwargs):
         output.speak(self.get_current_buffer().get_message())
 
-    def execute_action(self, action):
+    def execute_action(self, action, kwargs={}):
         if hasattr(self, action):
-            getattr(self, action)()
+            getattr(self, action)(**kwargs)
 
     def update_buffers(self):
         for i in self.buffers[:]:
@@ -1094,3 +1100,44 @@ class Controller(object):
         handler = self.get_handler(buffer.session.type)
         if handler:
             handler.update_profile(buffer.session)
+
+    def user_details(self, *args):
+        """Displays a user's profile."""
+        log.debug("Showing user profile...")
+        buffer = self.get_best_buffer()
+        handler = self.get_handler(type=buffer.session.type)
+        if handler and hasattr(handler, 'user_details'):
+            handler.user_details(buffer)
+
+    def openPostTimeline(self, *args, user=None):
+        """Opens selected user's posts timeline
+        Parameters:
+        args: Other argument. Useful when binding to widgets.
+        user: if specified, open this user timeline. It is currently mandatory, but could be optional when user selection is implemented in handler
+        """
+        buffer = self.get_best_buffer()
+        handler = self.get_handler(type=buffer.session.type)
+        if handler and hasattr(handler, 'openPostTimeline'):
+            handler.openPostTimeline(self, buffer, user)
+
+    def openFollowersTimeline(self, *args, user=None):
+        """Opens selected user's followers timeline
+        Parameters:
+        args: Other argument. Useful when binding to widgets.
+        user: if specified, open this user timeline. It is currently mandatory, but could be optional when user selection is implemented in handler
+        """
+        buffer = self.get_best_buffer()
+        handler = self.get_handler(type=buffer.session.type)
+        if handler and hasattr(handler, 'openFollowersTimeline'):
+            handler.openFollowersTimeline(self, buffer, user)
+
+    def openFollowingTimeline(self, *args, user=None):
+        """Opens selected user's  following timeline
+        Parameters:
+        args: Other argument. Useful when binding to widgets.
+        user: if specified, open this user timeline. It is currently mandatory, but could be optional when user selection is implemented in handler
+        """
+        buffer = self.get_best_buffer()
+        handler = self.get_handler(type=buffer.session.type)
+        if handler and hasattr(handler, 'openFollowingTimeline'):
+            handler.openFollowingTimeline(self, buffer, user)
