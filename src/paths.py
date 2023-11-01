@@ -19,7 +19,7 @@ def config_path():
     global mode, directory
     if mode == "portable":
         if directory != None: path = os.path.join(directory, "config")
-        elif directory == None: path = os.path.join(app_path(), "config")
+        elif directory == None: path = os.path.join(app_path(), "..", "config")
     elif mode == "installed":
         path = os.path.join(data_path(), "config")
     if not os.path.exists(path):
