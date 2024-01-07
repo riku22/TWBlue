@@ -42,7 +42,7 @@ sniffio
 attrs
 importlib-metadata
 numpy
-pillow<10.0
+pillow -C "zlib=disable" -C "jpeg=disable"
 charset-normalizer
 demoji
 psutil
