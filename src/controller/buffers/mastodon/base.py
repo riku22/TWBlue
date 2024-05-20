@@ -550,7 +550,7 @@ class BaseBuffer(base.Buffer):
             output.speak(_("No status found with that ID"))
             return
 #        print(post)
-        msg = messages.viewPost(item, offset_hours=self.session.db["utc_offset"], item_url=self.get_item_url(item=item))
+        msg = messages.viewPost(self.session, item, offset_hours=self.session.db["utc_offset"], item_url=self.get_item_url(item=item))
 
     def ocr_image(self):
         post = self.get_item()
@@ -591,8 +591,11 @@ class BaseBuffer(base.Buffer):
         response = viewer.message.ShowModal()
         viewer.message.Destroy()
 
-    def vote(self):
-        post = self.get_item()
+    def vote(self, item=None):
+        if item == None:
+            post = self.get_item()
+        else:
+            post = item
         if not hasattr(post, "poll") or post.poll == None:
             return
         poll = post.poll

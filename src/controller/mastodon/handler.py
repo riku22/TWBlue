@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import wx
 import logging
+import mastodon
 import output
+from mastodon import MastodonError
 from pubsub import pub
 from mysc import restart
 from mysc.thread_utils import call_threaded
@@ -10,7 +12,7 @@ from wxUI.dialogs.mastodon import dialogs
 from wxUI.dialogs import userAliasDialogs
 from wxUI import commonMessageDialogs
 from wxUI.dialogs.mastodon import updateProfile as update_profile_dialogs
-from wxUI.dialogs.mastodon import showUserProfile
+from wxUI.dialogs.mastodon import showUserProfile, communityTimeline
 from sessions.mastodon.utils import html_filter
 from . import userActions, settings
 
@@ -48,7 +50,7 @@ class Handler(object):
             details=_("Show user profile"),
             favs=None,
             # In buffer Menu.
-            trends=None,
+            community_timeline =_("Create community timeline"),
             filter=None,
             manage_filters=None
         )
@@ -105,6 +107,13 @@ class Handler(object):
         searches_position =controller.view.search("searches", name)
         for term in session.settings["other_buffers"]["post_searches"]:
             pub.sendMessage("createBuffer", buffer_type="SearchBuffer", session_type=session.type, buffer_title=_("Search for {}").format(term), parent_tab=searches_position, start=True, kwargs=dict(parent=controller.view.nb, compose_func="compose_post", function="search", name="%s-searchterm" % (term,), sessionObject=session, account=session.get_name(), sound="search_updated.ogg", q=term, result_type="statuses"))
+        pub.sendMessage("createBuffer", buffer_type="EmptyBuffer", session_type="base", buffer_title=_("Communities"), parent_tab=root_position, start=False, kwargs=dict(parent=controller.view.nb, name="communities", account=name))
+        communities_position =controller.view.search("communities", name)
+        for community in session.settings["other_buffers"]["communities"]:
+            bufftype = _("Local") if community.split("@")[0] == "local" else _("federated")
+            community_name = community.split("@")[1].replace("https://", "")
+            title = _(f"{bufftype} timeline for {community_name}")
+            pub.sendMessage("createBuffer", buffer_type="CommunityBuffer", session_type=session.type, buffer_title=title, parent_tab=communities_position, start=True, kwargs=dict(parent=controller.view.nb, function="timeline", compose_func="compose_post", name=community, sessionObject=session, community_url=community.split("@")[1], account=session.get_name(), sound="search_updated.ogg", timeline=community.split("@")[0]))
 #        for i in session.settings["other_buffers"]["trending_topic_buffers"]:
 #            pub.sendMessage("createBuffer", buffer_type="TrendsBuffer", session_type=session.type, buffer_title=_("Trending topics for %s") % (i), parent_tab=root_position, start=False, kwargs=dict(parent=controller.view.nb, name="%s_tt" % (i,), sessionObject=session, name, trendsFor=i, sound="trends_updated.ogg"))
 
@@ -359,3 +368,29 @@ class Handler(object):
                 user = buffer.session.api.account(selectedUser[-1])
         dlg = showUserProfile.ShowUserProfile(user)
         dlg.ShowModal()
+
+    def community_timeline(self, controller, buffer):
+        dlg = communityTimeline.CommunityTimeline()
+        if dlg.ShowModal() != wx.ID_OK:
+            return
+        url = dlg.url.GetValue()
+        bufftype = dlg.get_action()
+        local_api = mastodon.Mastodon(api_base_url=url)
+        try:
+            instance = local_api.instance()
+        except MastodonError:
+            commonMessageDialogs.invalid_instance()
+            return
+        if bufftype == "local":
+            title = _(f"Local timeline for {url.replace('https://', '')}")
+        else:
+            title = _(f"Federated timeline for {url}")
+            bufftype = "public"
+        dlg.Destroy()
+        tl_info = f"{bufftype}@{url}"
+        if tl_info in buffer.session.settings["other_buffers"]["communities"]:
+            return # buffer already exists.
+        buffer.session.settings["other_buffers"]["communities"].append(tl_info)
+        buffer.session.settings.write()
+        communities_position =controller.view.search("communities", buffer.session.get_name())
+        pub.sendMessage("createBuffer", buffer_type="CommunityBuffer", session_type=buffer.session.type, buffer_title=title, parent_tab=communities_position, start=True, kwargs=dict(parent=controller.view.nb, function="timeline", name=tl_info, sessionObject=buffer.session, account=buffer.session.get_name(), sound="tweet_timeline.ogg", community_url=url, timeline=bufftype))

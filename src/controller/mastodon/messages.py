@@ -6,10 +6,12 @@ import widgetUtils
 import config
 import output
 from twitter_text import parse_tweet, config
+from mastodon import MastodonError
 from controller import messages
 from sessions.mastodon import templates
 from wxUI.dialogs.mastodon import postDialogs
 from extra.autocompletionUsers import completion
+from . import userList
 
 def character_count(post_text, post_cw, character_limit=500):
     # We will use text for counting character limit only.
@@ -235,9 +237,11 @@ class post(messages.basicMessage):
         self.message.visibility.SetSelection(setting)
 
 class viewPost(post):
-    def __init__(self, post, offset_hours=0, date="", item_url=""):
+    def __init__(self, session, post, offset_hours=0, date="", item_url=""):
+        self.session = session
         if post.reblog != None:
             post = post.reblog
+        self.post_id = post.id
         author = post.account.display_name if post.account.display_name != "" else post.account.username
         title = _(u"Post from {}").format(author)
         image_description = templates.process_image_descriptions(post.media_attachments)
@@ -254,6 +258,13 @@ class viewPost(post):
         else:
             source = source_obj.get("name")
         self.message = postDialogs.viewPost(text=text, boosts_count=boost_count, favs_count=favs_count, source=source, date=date, privacy=privacy)
+        participants = [post.account.id] + [account.id for account in post.mentions]
+        print(post, participants)
+        if self.session.db["user_id"] in participants:
+            self.message.mute.Enable(True)
+            if post.muted:
+                self.message.mute.SetLabel(_("Unmute conversation"))
+            widgetUtils.connect_event(self.message.mute, widgetUtils.BUTTON_PRESSED, self.mute_unmute)
         self.message.SetTitle(title)
         if image_description != "":
             self.message.image_description.Enable(True)
@@ -264,11 +275,41 @@ class viewPost(post):
             widgetUtils.connect_event(self.message.share, widgetUtils.BUTTON_PRESSED, self.share)
             self.item_url = item_url
         widgetUtils.connect_event(self.message.translateButton, widgetUtils.BUTTON_PRESSED, self.translate)
+        widgetUtils.connect_event(self.message.boosts_button, widgetUtils.BUTTON_PRESSED, self.on_boosts)
+        widgetUtils.connect_event(self.message.favorites_button, widgetUtils.BUTTON_PRESSED, self.on_favorites)
         self.message.ShowModal()
 
     # We won't need text_processor in this dialog, so let's avoid it.
     def text_processor(self):
         pass
+
+    def mute_unmute(self, *args, **kwargs):
+        post = self.session.api.status(self.post_id)
+        if post.muted == True:
+            action = "status_unmute"
+            new_label = _("Mute conversation")
+            msg = _("Conversation unmuted.")
+        else:
+            action = "status_mute"
+            new_label = _("Unmute conversation")
+            msg = _("Conversation muted.")
+        try:
+            getattr(self.session.api, action)(self.post_id)
+            self.message.mute.SetLabel(new_label)
+            output.speak(msg)
+        except MastodonError:
+            return
+
+
+    def on_boosts(self, *args, **kwargs):
+        users = self.session.api.status_reblogged_by(self.post_id)
+        title = _("people who boosted this post")
+        user_list = userList.MastodonUserList(session=self.session, users=users, title=title)
+
+    def on_favorites(self, *args, **kwargs):
+        users = self.session.api.status_favourited_by(self.post_id)
+        title = _("people who favorited this post")
+        user_list = userList.MastodonUserList(session=self.session, users=users, title=title)
 
     def share(self, *args, **kwargs):
         if hasattr(self, "item_url"):
