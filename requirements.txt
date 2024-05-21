@@ -53,5 +53,5 @@ winpaths==0.2
 wxPython==4.2.1
 zipp==3.18.2
 yt-dlp==2024.4.9
-pyinstaller==6.5.0
+pyinstaller==6.7.0
 pip-review
