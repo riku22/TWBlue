@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: TW Blue 0.94\n"
 "Report-Msgid-Bugs-To: manuel@manuelcortez.net\n"
-"POT-Creation-Date: 2024-06-02 00:55+0000\n"
-"PO-Revision-Date: 2024-05-25 06:46+0000\n"
+"POT-Creation-Date: 2024-06-16 00:55+0000\n"
+"PO-Revision-Date: 2024-06-04 16:03+0000\n"
 "Last-Translator: Corentin Bacqué-Cazenave <corentin@progaccess.net>\n"
 "Language: fr\n"
 "Language-Team: French "
@@ -595,9 +595,8 @@ msgid "Communities"
 msgstr "Communautés"
 
 #: controller/mastodon/handler.py:113
-#, fuzzy
 msgid "federated"
-msgstr "Fédéré"
+msgstr "fédéré"
 
 #: controller/mastodon/handler.py:142
 msgid "Conversation with {0}"
@@ -2113,7 +2112,7 @@ msgstr "Masquer l'interface graphique au démarrage"
 
 #: wxUI/dialogs/configuration.py:43
 msgid "Read long posts in GUI"
-msgstr ""
+msgstr "Lire les posts longs dans l'interface graphique"
 
 #: wxUI/dialogs/configuration.py:46
 msgid "Keymap"
@@ -2344,14 +2343,12 @@ msgid "Buffer type"
 msgstr "Type de tampon"
 
 #: wxUI/dialogs/mastodon/communityTimeline.py:17
-#, fuzzy
 msgid "&Local timeline"
-msgstr "Chronologies"
+msgstr "Chronologie &Local"
 
 #: wxUI/dialogs/mastodon/communityTimeline.py:18
-#, fuzzy
 msgid "&Federated Timeline"
-msgstr "Chronologie de {username}"
+msgstr "Chronologie &Fédérée"
 
 #: wxUI/dialogs/mastodon/communityTimeline.py:25
 #: wxUI/dialogs/mastodon/search.py:24
@@ -2884,29 +2881,24 @@ msgid "{}'s Profile"
 msgstr "Actualiser le profil"
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:79
-#, fuzzy
 msgid "&Name: "
-msgstr "Nom "
+msgstr "&Nom : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:84
-#, fuzzy
 msgid "&URL: "
-msgstr "Utilisateur: "
+msgstr "&URL : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:89
-#, fuzzy
 msgid "&Bio: "
-msgstr "Bio "
+msgstr "&Bio : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:94
-#, fuzzy
 msgid "&Joined at: "
-msgstr "A rejoint le : "
+msgstr "&A rejoint le : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:99
-#, fuzzy
 msgid "&Actions"
-msgstr "Actions"
+msgstr "&Actions"
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:104
 msgid "Header: "
@@ -2917,9 +2909,8 @@ msgid "Avatar: "
 msgstr "Avatar "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:122
-#, fuzzy
 msgid "Field &{} - Label: "
-msgstr "Champ {} : Étiquette "
+msgstr "Champ &{} - Label : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:129
 msgid "Content: "
@@ -2934,86 +2925,72 @@ msgid "No"
 msgstr "Non"
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:137
-#, fuzzy
 msgid "&Private account: "
-msgstr "Compte privé "
+msgstr "&Compte Privé : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:144
-#, fuzzy
 msgid "&Bot account: "
-msgstr "Compte robot "
+msgstr "&Compte Robot : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:151
-#, fuzzy
 msgid "&Discoverable account: "
-msgstr "Compte suggérable "
+msgstr "&Compte Découvrable : "
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:157
-#, fuzzy
 msgid "{} p&osts. Click to open posts timeline"
-msgstr "{} posts. Cliquer pour afficher la chronologie des posts."
+msgstr "{} p&osts. Cliquez pour ouvrir la chronologie des posts"
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:162
-#, fuzzy
 msgid "{} &following. Click to open Following timeline"
-msgstr "{} abonnements. Cliquer pour afficher la chronologie des abonnements."
+msgstr "{} &abonnements. Cliquez pour ouvrir la chronologie des abonnements"
 
 #: wxUI/dialogs/mastodon/showUserProfile.py:166
-#, fuzzy
 msgid "{} fo&llowers. Click to open followers timeline"
-msgstr "{} abonnés. Cliquer pour afficher la chronologie des abonnés."
+msgstr "{} a&bonnés. Cliquez pour ouvrir la chronologie des abonnés"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:43
-#, fuzzy
 msgid "&Display Name"
-msgstr "Nom d'affichage"
+msgstr "&Nom d'affichage"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:50
-#, fuzzy
 msgid "&Bio"
-msgstr "Bio"
+msgstr "&Bio"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:58
 msgid "Header"
 msgstr "En-tête"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:71
-#, fuzzy
 msgid "Change &header"
-msgstr "Changer l'en-tête"
+msgstr "C&hanger d'en-tête"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:79
 msgid "Avatar"
 msgstr "Avatar"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:92
-#, fuzzy
 msgid "Change &avatar"
-msgstr "Changer l'avatar"
+msgstr "Changer d'&avatar"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:102
-#, fuzzy
 msgid "Field &{}: Label"
-msgstr "Champ {} : Étiquette"
+msgstr "Champ &{} : Label"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:110
 msgid "Content"
 msgstr "Contenu"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:120
-#, fuzzy
 msgid "&Private account"
-msgstr "Compte privé"
+msgstr "&Compte privé"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:122
-#, fuzzy
 msgid "&Bot account"
-msgstr "Compte robot"
+msgstr "Compte &Robot"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:124
-#, fuzzy
 msgid "&Discoverable account"
-msgstr "Compte suggérable"
+msgstr "Compte &Découvrable"
 
 #: wxUI/dialogs/mastodon/updateProfile.py:167
 msgid "Select header image - max 2MB"
