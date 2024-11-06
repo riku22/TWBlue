@@ -1,4 +1,4 @@
-yt-dlp==2024.10.22
+yt-dlp==2024.11.4
 pyinstaller==6.11.0
 pyinstaller-hooks-contrib==2024.9
 pip-review
