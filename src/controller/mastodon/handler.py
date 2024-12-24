@@ -50,7 +50,7 @@ class Handler(object):
             details=_("Show user profile"),
             favs=None,
             # In buffer Menu.
-            community_timeline =_("Create community timeline"),
+            community_timeline =_("Create c&ommunity timeline"),
             filter=None,
             manage_filters=None
         )
@@ -144,7 +144,11 @@ class Handler(object):
     def follow(self, buffer):
         if not hasattr(buffer, "get_item"):
             return
-        item = buffer.get_item()
+        # Community buffers are special because we'll need to retrieve the object locally at first.
+        if hasattr(buffer, "community_url"):
+            item = buffer.get_item_from_instance()
+        else:
+            item = buffer.get_item()
         if buffer.type == "user":
             users = [item.acct]
         elif buffer.type == "baseBuffer":
@@ -196,7 +200,10 @@ class Handler(object):
     def open_timeline(self, controller, buffer):
         if not hasattr(buffer, "get_item"):
             return
-        item = buffer.get_item()
+        if hasattr(buffer, "community_url"):
+            item = buffer.get_item_from_instance()
+        else:
+            item = buffer.get_item()
         if buffer.type == "user":
             users = [item.acct]
         elif buffer.type == "baseBuffer":
