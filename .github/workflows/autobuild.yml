@@ -4,8 +4,7 @@ name: AutoBuild
 on:
   push:
     branches:
-      - master
-  workflow_dispatch:
+      - "yt-dlp"
 
 jobs:
   build:
@@ -25,7 +24,6 @@ jobs:
       run: |
         pip install --upgrade pip setuptools wheel
         pip install -r requirements.txt
-        pip-review
     - name: Build binary
       run: |
         .\scripts\build_pyinstaller.ps1
@@ -33,5 +31,5 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: twblue_binary
-        path: ./dist/TWBlue
+        path: ./src/dist/TWBlue
         retention-days: 3
