@@ -1,6 +1,6 @@
 # Release a new TW Blue installer on github.
 # This workflow runs on push.
-name: Release
+name: AutoBuild
 on:
   push:
     branches:
