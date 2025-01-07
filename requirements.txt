@@ -9,10 +9,10 @@ backports.functools-lru-cache==2.0.0
 blurhash==1.1.4
 certifi==2024.12.14
 chardet==5.2.0
-charset-normalizer==3.4.0
+charset-normalizer==3.4.1
 colorama==0.4.6
 configobj==5.0.9
-coverage==7.6.9
+coverage==7.6.10
 decorator==5.1.1
 demoji==1.1.0
 deepl==1.20.0
@@ -22,13 +22,13 @@ importlib-metadata==8.5.0
 iniconfig==2.0.0
 libloader @ git+https://github.com/accessibleapps/libloader@bc94811c095b2e57a036acd88660be9a33260267
 libretranslatepy==2.1.4
-lief==0.16.0
+lief==0.15.1
 Markdown==3.7
 Mastodon.py==1.8.1
 numpy==2.2.1
 oauthlib==3.2.2
 packaging==24.2
-pillow==11.0.0 -C "zlib=disable" -C "jpeg=disable"
+pillow==11.1.0 -C "zlib=disable" -C "jpeg=disable"
 platform_utils @ git+https://github.com/accessibleapps/platform_utils@e0d79f7b399c4ea677a633d2dde9202350d62c38
 pluggy==1.5.0
 psutil==6.1.1
