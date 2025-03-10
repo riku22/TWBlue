@@ -9,7 +9,7 @@ from . import utils, compose
 # This will be used for the edit template dialog.
 # Available variables for post objects.
 # safe_text will be the content warning in case a post contains one, text will always be the full text, no matter if has a content warning or not.
-post_variables = ["date", "display_name", "screen_name", "source", "lang", "safe_text", "text", "image_descriptions", "visibility"]
+post_variables = ["date", "display_name", "screen_name", "source", "lang", "safe_text", "text", "image_descriptions", "visibility", "pinned"]
 person_variables = ["display_name", "screen_name", "description", "followers", "following", "favorites", "posts", "created_at"]
 conversation_variables = ["users", "last_post"]
 notification_variables = ["display_name", "screen_name", "text", "date"]
@@ -57,6 +57,7 @@ def render_post(post, template, settings, relative_times=False, offset_hours=0):
     $text: Toot text. This always displays the full text, even if there is a content warning present.
     $image_descriptions: Information regarding image descriptions added by twitter users.
     $visibility: post's visibility: public, not listed, followers only or direct.
+    $pinned: Wether the post is pinned or not (if not pinned, this will be blank).
     """
     global post_variables
     available_data = dict(source="")
@@ -75,6 +76,9 @@ def render_post(post, template, settings, relative_times=False, offset_hours=0):
     else:
         text = process_text(post, safe=False)
         safe_text = process_text(post)
+    filtered = utils.evaluate_filters(post=post, current_context="home")
+    if filtered != None:
+        text = _("hidden by filter {}").format(filtered)
     visibility_settings = dict(public=_("Public"), unlisted=_("Not listed"), private=_("Followers only"), direct=_("Direct"))
     visibility = visibility_settings.get(post.visibility)
     available_data.update(lang=post.language, text=text, safe_text=safe_text, visibility=visibility)
@@ -85,6 +89,12 @@ def render_post(post, template, settings, relative_times=False, offset_hours=0):
     else:
         image_descriptions = process_image_descriptions(post.media_attachments)
     available_data.update(image_descriptions=image_descriptions)
+    # Process if the post is pinned
+    if post.get("pinned", False):
+        pinned = _("Pinned.")
+    else:
+        pinned = ""
+    available_data.update(pinned=pinned)
     result = Template(_(template)).safe_substitute(**available_data)
     return result
 
@@ -161,6 +171,9 @@ def render_notification(notification, template, post_template, settings, relativ
         text = _("A poll in which you have voted has expired: {status}").format(status=render_post(notification.status, post_template, settings, relative_times, offset_hours))
     elif notification.type == "follow_request":
         text = _("wants to follow you.")
+    filtered = utils.evaluate_filters(post=notification, current_context="notifications")
+    if filtered != None:
+        text = _("hidden by filter {}").format(filtered)
     available_data.update(text=text)
     result = Template(_(template)).safe_substitute(**available_data)
     result = result.replace(" . ", "")

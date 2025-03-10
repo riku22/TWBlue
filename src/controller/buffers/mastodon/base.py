@@ -108,13 +108,28 @@ class BaseBuffer(base.Buffer):
                     min_id = self.session.db[self.name][0].id
                 else:
                     min_id = self.session.db[self.name][-1].id
+            # loads pinned posts from user accounts.
+            # Load those posts only when there are no items previously loaded.
+            if "-timeline" in self.name and "account_statuses" in self.function and len(self.session.db.get(self.name, [])) == 0:
+                pinned_posts = self.session.api.account_statuses(pinned=True, limit=count, *self.args, **self.kwargs)
+                pinned_posts.reverse()
+            else:
+                pinned_posts = None
             try:
                 results = getattr(self.session.api, self.function)(min_id=min_id, limit=count, *self.args, **self.kwargs)
                 results.reverse()
             except Exception as e:
                 log.exception("Error %s" % (str(e)))
                 return
+            if self.session.settings["general"]["reverse_timelines"]:
+                if pinned_posts != None and len(pinned_posts) > 0:
+                    amount_of_pinned_posts = self.session.order_buffer(self.name, pinned_posts)
             number_of_items = self.session.order_buffer(self.name, results)
+            if self.session.settings["general"]["reverse_timelines"] == False:
+                if pinned_posts != None and len(pinned_posts) > 0:
+                    amount_of_pinned_posts = self.session.order_buffer(self.name, pinned_posts)
+            if pinned_posts != None and len(pinned_posts) > 0:
+                number_of_items = amount_of_pinned_posts+number_of_items
             log.debug("Number of items retrieved: %d" % (number_of_items,))
             if hasattr(self, "finished_timeline") and self.finished_timeline == False:
                 if "-timeline" in self.name:
@@ -157,6 +172,9 @@ class BaseBuffer(base.Buffer):
         items_db = self.session.db[self.name]
         for i in items:
             if utils.find_item(i, self.session.db[self.name]) == None:
+                filter_status = utils.evaluate_filters(post=i, current_context=utils.get_current_context(self.name))
+                if filter_status == "hide":
+                    continue
                 elements.append(i)
                 if self.session.settings["general"]["reverse_timelines"] == False:
                     items_db.insert(0, i)
@@ -554,7 +572,6 @@ class BaseBuffer(base.Buffer):
         except MastodonNotFoundError:
             output.speak(_("No status found with that ID"))
             return
-        # print(item)
         msg = messages.viewPost(self.session, item, offset_hours=self.session.db["utc_offset"], item_url=self.get_item_url(item=item))
 
     def ocr_image(self):
