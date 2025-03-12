@@ -10,6 +10,6 @@ echo "done."
 
 echo "Building binary..."
 cd src
-python -O -m PyInstaller main_1.spec
+python -OO -m PyInstaller main_1.spec
 cd ..
 echo "done."
