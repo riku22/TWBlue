@@ -2,8 +2,6 @@ name: Update translation files
 
 on: 
   workflow_dispatch:
-  schedule:
-    - cron: "35 0 * * 0"
 
 permissions: write-all
 
