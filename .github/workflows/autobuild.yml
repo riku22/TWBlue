@@ -9,7 +9,7 @@ on:
 jobs:
   build:
   # Builds an x64 binary and an installer of TW Blue.
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
     - name: clone repo
       uses: actions/checkout@v4
