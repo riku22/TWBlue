@@ -5,7 +5,8 @@ on:
   push:
     branches:
       - "yt-dlp"
-
+env:
+  PYTHON_VERSION: "3.13.9"
 jobs:
   build:
   # Builds an x64 binary and an installer of TW Blue.
@@ -18,10 +19,11 @@ jobs:
     - name: Get python interpreter
       uses: actions/setup-python@v4
       with:
-        python-version: '3.13'
-        cache: 'pip'
-    - name: Install python packages
-      run: pip install --upgrade pip -r requirements.txt
+        python-version: ${{ env.PYTHON_VERSION }}
+    - name: Install the latest version of uv
+      uses: astral-sh/setup-uv@v6
+      with:
+        python-version: cpython-${{ env.PYTHON_VERSION }}-windows-x86_64-none
     - name: Build binary
       run: .\scripts\build_pyinstaller.ps1
     - name: uploadArtifact
