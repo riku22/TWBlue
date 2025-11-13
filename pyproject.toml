@@ -63,7 +63,7 @@ dependencies = [
     "win-inet-pton>=1.1.0",
     "winpaths>=0.2",
     "wxpython>=4.2.3",
-    "yt-dlp>=2025.9.26",
+    "yt-dlp[default]>=2025.11.12",
     "zipp>=3.23.0",
 ]
 
