@@ -2,30 +2,25 @@
 import wx
 from multiplatform_widgets import widgets
 
-class conversationListPanel(wx.Panel):
+class announcementsPanel(wx.Panel):
 
     def set_focus_function(self, f):
         self.list.list.Bind(wx.EVT_LIST_ITEM_FOCUSED, f)
 
     def create_list(self):
-        self.list = widgets.list(self, _(u"User"), _(u"Text"), _(u"Date"), _(u"Client"), style=wx.LC_REPORT|wx.LC_SINGLE_SEL|wx.LC_VRULES)
-        self.list.set_windows_size(0, 200)
-        self.list.set_windows_size(1, 600)
-        self.list.set_windows_size(2, 200)
-        self.list.set_windows_size(3, 200)
+        self.list = widgets.list(self, _("Announcement"), style=wx.LC_REPORT|wx.LC_SINGLE_SEL|wx.LC_VRULES)
+        self.list.set_windows_size(0, 800)
         self.list.set_size()
 
     def __init__(self, parent, name):
-        super(conversationListPanel, self).__init__(parent)
+        super(announcementsPanel, self).__init__(parent)
         self.name = name
         self.type = "baseBuffer"
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.create_list()
-        self.post = wx.Button(self, -1, _("Post"))
-        self.reply = wx.Button(self, -1, _(u"Reply"))
+        self.dismiss = wx.Button(self, -1, _("Dismiss"))
         btnSizer = wx.BoxSizer(wx.HORIZONTAL)
-        btnSizer.Add(self.post, 0, wx.ALL, 5)
-        btnSizer.Add(self.reply, 0, wx.ALL, 5)
+        btnSizer.Add(self.dismiss, 0, wx.ALL, 5)
         self.sizer.Add(btnSizer, 0, wx.ALL, 5)
         self.sizer.Add(self.list.list, 1, wx.ALL|wx.EXPAND, 5)
         self.SetSizer(self.sizer)
