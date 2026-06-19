@@ -8,14 +8,14 @@ chardet==7.4.3
 charset-normalizer==3.4.7
 colorama==0.4.6
 configobj==5.0.9
-coverage==7.14.0
+coverage==7.14.1
 cx-Freeze==8.6.4
 cx-Logging==3.2.1
 decorator==5.3.1
 demoji==2.0.0
 deepl==1.30.0
 future==1.0.0
-idna==3.16
+idna==3.18
 importlib-metadata==9.0.0
 iniconfig==2.3.0
 libloader @ git+https://github.com/accessibleapps/libloader@bc94811c095b2e57a036acd88660be9a33260267
@@ -34,11 +34,11 @@ pyenchant==3.3.0
 pypiwin32==223
 Pypubsub==4.0.7
 PySocks==1.7.1
-pytest==9.0.3
+pytest==9.1.0
 python-dateutil==2.9.0.post0
 python-magic-bin==0.4.14
 python-vlc==3.0.21203
-pywin32==311
+pywin32==312
 requests==2.34.2
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
@@ -56,4 +56,4 @@ winpaths==0.2
 wxPython==4.2.5
 youtube-dl==2021.12.17
 zipp==4.1.0
-atproto>=0.0.65
+atproto>=0.0.68
