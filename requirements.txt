@@ -5,25 +5,25 @@ backports.functools-lru-cache==2.0.0
 blurhash==1.1.5
 certifi==2026.7.22
 chardet==7.6.0
-charset-normalizer==3.5.0
+charset-normalizer==3.5.1
 colorama==0.4.6
 configobj==5.0.9
-coverage==7.15.4
-cx-Freeze==8.6.4
+coverage==7.16.0
+cx-Freeze==8.7.0
 cx-Logging==3.2.1
 decorator==5.3.1
 demoji==2.0.0
 deepl==1.32.0
 future==1.0.0
 grapheme==0.6.0
-idna==3.18
-importlib-metadata==9.0.0
+idna==3.19
+importlib-metadata==9.0.1
 iniconfig==2.3.0
 libloader @ git+https://github.com/accessibleapps/libloader@bc94811c095b2e57a036acd88660be9a33260267
 libretranslatepy==2.1.4
 lief==0.15.1
 Markdown==3.10.3
-Mastodon.py==2.2.1
+Mastodon.py==2.2.2
 numpy==2.5.2
 oauthlib==3.3.1
 packaging==26.3
@@ -56,4 +56,4 @@ winpaths==0.2
 wxPython==4.3.1
 youtube-dl==2021.12.17
 zipp==4.1.0
-atproto>=0.0.69
+atproto>=0.0.71
