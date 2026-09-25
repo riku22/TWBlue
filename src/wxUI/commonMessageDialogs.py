@@ -36,7 +36,7 @@ def invalid_configuration():
     return wx.MessageDialog(None, _("The configuration file is invalid."), _("Error"), wx.ICON_ERROR).ShowModal()
 
 def dead_pid():
-    return wx.MessageDialog(None, _(u"{0} quit unexpectedly the last time it was run. If the problem persists, please report it to the {0} developers.").format(application.name), _(u"Warning"), wx.OK).ShowModal()
+    return
 
 def cant_update_source() -> wx.MessageDialog:
     """Shows a dialog telling a user he /she can't update because he / she is
