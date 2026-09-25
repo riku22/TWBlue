@@ -56,7 +56,6 @@ a = Analysis(['main.py'],
 ("icon.ico", "."),
 ]+get_architecture_files()+wx_files(),
              datas=[]
-+collect_data_files('twitter_text')
 +collect_data_files('demoji'),
 #             hiddenimports=["twitter_text", "yt_dlp", "mastodon"],
              hookspath=[],
