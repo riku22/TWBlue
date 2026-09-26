@@ -688,6 +688,7 @@ class Controller(object):
         pidpath = os.path.join(os.getenv("temp"), "{}.pid".format(application.name))
         if os.path.exists(pidpath):
             os.remove(pidpath)
+        log.debug("Exit application")
         widgetUtils.exit_application()
 
     def get_diagnostics_snapshot(self):

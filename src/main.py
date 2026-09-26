@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import ctypes
 import sys
 import os
 import platform
@@ -105,20 +106,35 @@ def donation():
         webbrowser.open_new_tab(_("https://twblue.mcvsoftware.com/donate"))
     config.app["app-settings"]["donation_dialog_displayed"] = True
 
-def check_pid():
-    "Ensures that only one copy of the application is running at a time."
-    pidpath = os.path.join(os.getenv("temp"), "{}.pid".format(application.name))
-    if os.path.exists(pidpath):
+def is_running():
+    if platform.system() == "Windows":
+        ERROR_ALREADY_EXISTS=0XB7
+        mutex=ctypes.windll.kernel32.CreateMutexW(None, True, f"{application.short_name}_mutex")
+        if not mutex or ctypes.windll.kernel32.GetLastError() == ERROR_ALREADY_EXISTS:
+            if mutex: ctypes.windll.kernel32.CloseHandle(mutex)
+            return True
+        else:
+            return False
+    else:
+        pidpath = os.path.join(os.getenv("temp"), "{}.pid".format(application.name))
+        if not os.path.exists(pidpath): return False
         with open(pidpath) as fin:
             pid = int(fin.read())
         try:
             p = psutil.Process(pid=pid)
             if p.is_running():
-                # Display warning dialog
-                commonMessageDialogs.common_error(_("{0} is already running. Close the other instance before starting this one. If you're sure that {0} isn't running, try deleting the file at {1}. If you're unsure of how to do this, contact the {0} developers.").format(application.name, pidpath))
-                sys.exit(1)
+                return True
         except psutil.NoSuchProcess:
             commonMessageDialogs.dead_pid()
+            return False
+
+def check_pid():
+    "Ensures that only one copy of the application is running at a time."
+    if is_running():
+        commonMessageDialogs.common_error(_("{0} is already running. Close the other instance before starting this one.").format(application.name))
+        sys.exit(1)
+    if platform.system() == "Windows": return
+    pidpath = os.path.join(os.getenv("temp"), "{}.pid".format(application.name))
     # Write the new PID
     with open(pidpath,"w") as cam:
         cam.write(str(os.getpid()))
